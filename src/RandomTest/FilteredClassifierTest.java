@@ -1,5 +1,8 @@
 package RandomTest;
 
+import Core.ClassifierEvalDescriptionTriplet;
+import Core.ClassifierEvalDescriptionTripletComparator;
+import Core.Util;
 import Pipeline.ClassificationPipeline;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -14,7 +17,10 @@ import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.RemoveByName;
 
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -32,7 +38,7 @@ public class FilteredClassifierTest {
 
         //TODO: Split into desired substs
         //Create filters for desired subsets
-        RemoveByName selectOnlyRaw = new RemoveByName();
+        /*RemoveByName selectOnlyRaw = new RemoveByName();
         selectOnlyRaw.setExpression("^ECDF_(DISC_.|UP|REST)_BIN_(..|.)_OF_..*");
         selectOnlyRaw.setInputFormat(alldata);
 
@@ -77,6 +83,70 @@ public class FilteredClassifierTest {
         Evaluation eval = new Evaluation(alldata);
         eval.crossValidateModel(stack,alldata,10, new Random());
         System.out.println(eval.toClassDetailsString());
-        System.out.println(eval.toMatrixString());
+        System.out.println(eval.toMatrixString());*/
+        LibSVM firstClassifier = new LibSVM();
+        FilteredClassifier filt = new FilteredClassifier();
+        filt.setClassifier(firstClassifier);
+        filt.setFilter(new RemoveByName());
+
+        LibSVM secondClassifier = new LibSVM();
+        Classifier classifier = new LibSVM();
+        if(classifier instanceof LibSVM){
+            ((LibSVM) classifier).setProbabilityEstimates(true);
+        }
+        if(filt.getClassifier() instanceof LibSVM){
+            ((LibSVM) filt.getClassifier()).setProbabilityEstimates(true);
+        }
+        classifier.buildClassifier(alldata);
+        secondClassifier.buildClassifier(alldata);
+        filt.buildClassifier(alldata);
+
+        exportClassifiers(classifier, "classifier");
+        exportClassifiers(secondClassifier, "secondClassifier");
+        exportClassifiers(filt, "filt");
+
+        classifier = importClassifier("classifier");
+        secondClassifier = (LibSVM) importClassifier("secondClassifier");
+        filt = (FilteredClassifier) importClassifier("filt");
+
+        Random random = new Random();
+
+        for (int i = 0; i < 10; i++) {
+            int testInstance = random.nextInt(alldata.numInstances()-1);
+            System.out.print(Arrays.toString(classifier.distributionForInstance(alldata.get(testInstance)))+ " = ");
+            System.out.println(classifier.classifyInstance(alldata.get(testInstance)));
+            System.out.print(Arrays.toString(secondClassifier.distributionForInstance(alldata.get(testInstance)))+ " = ");
+            System.out.println(secondClassifier.classifyInstance(alldata.get(testInstance)));
+            System.out.print(Arrays.toString(filt.distributionForInstance(alldata.get(testInstance)))+ " = ");
+            System.out.println(filt.classifyInstance(alldata.get(testInstance)));
+        }
+    }
+
+    private static Classifier importClassifier(String classifier) {
+        String folderpath = "D:\\Dropbox\\Thesis\\Data\\TestRandomTest\\";
+        try {
+            InputStream is = new FileInputStream(folderpath+classifier+".model");
+            Classifier classifier1 = (Classifier) weka.core.SerializationHelper.read(is);
+            return classifier1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static void exportClassifiers(Classifier classifier, String name) {
+
+        String folderpath = "D:\\Dropbox\\Thesis\\Data\\TestRandomTest\\";
+        String filename = System.currentTimeMillis()+ "_"+ classifier.getClass().getSimpleName();
+
+        try {
+            ObjectOutputStream oss = new ObjectOutputStream(new FileOutputStream(folderpath+name+".model"));
+            oss.writeObject(classifier);
+            oss.flush();
+            oss.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

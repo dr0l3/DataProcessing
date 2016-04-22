@@ -12,8 +12,7 @@ import org.knowm.xchart.Series_XY;
 import org.knowm.xchart.internal.style.markers.SeriesMarkers;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,48 @@ public class ChartGenerator {
 
         ArrayList<Window> windows = RawlineToTapWindowConverterVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawTapData", 3.0);
 
-        printDerivatives(windows);
+        String path = "D:\\Dropbox\\Thesis\\Data\\CorrectedWindows\\correctedWindows1039065005";
+        List<Window> windows_from_file = null;
+        try {
+            windows_from_file = getWindowsFromFile(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //printDerivatives(windows);
+
+        if (windows_from_file != null) {
+            printCharts(windows_from_file);
+        }
+
+
+    }
+
+    private static List<Window> getWindowsFromFile(String path) throws IOException {
+        List<Object> results = new ArrayList<>();
+        FileInputStream fis;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream(path);
+
+            ois = new ObjectInputStream(fis);
+            results = (List<Object>) ois.readObject();
+
+        } catch (OptionalDataException e) {
+            if (!e.eof) throw e;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            assert ois != null;
+            ois.close();
+        }
+        List<Window> windows = new ArrayList<>();
+        for (Object obj :
+                results) {
+            windows.add((Window) obj);
+        }
+
+        return windows;
     }
 
     public static void printDerivatives(List<Window> windows) {
