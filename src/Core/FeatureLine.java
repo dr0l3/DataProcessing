@@ -39,6 +39,18 @@ public class FeatureLine implements Serializable {
         calculateRelativeMovement();
     }
 
+    public FeatureLine(FeatureLine featureLine){
+        this.accX = featureLine.getAccX();
+        this.accY = featureLine.getAccY();
+        this.accZ = featureLine.getAccZ();
+        this.graX = featureLine.getGraX();
+        this.graY = featureLine.getGraY();
+        this.graZ = featureLine.getGraZ();
+        this.timestamp = featureLine.getTimestamp();
+        this.proximity = featureLine.getProximity();
+        calculateRelativeMovement();
+    }
+
     public FeatureLine(Double accX, Double accY, Double accZ, Double graX, Double graY, Double graZ, int timestamp, ProximityValue proximity) {
         this.accX = accX;
         this.accY = accY;

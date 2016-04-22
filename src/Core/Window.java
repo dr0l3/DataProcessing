@@ -22,22 +22,14 @@ public class Window implements Serializable {
     private String label;
     private List<FeatureLine> listOfFeatureLines;
     private List<Pair<?,?>> listOfFeatures;
-    private double median;
-    private double mean;
-    private double min;
-    private double max;
-    private double range;
-    private double rootMeanSquare;
-    private double correlation;
-    private double crossCorrelation;
-    private double integration;
-    private double difference;
-    private double angularVelocity;
-    private double zeroCrossing;
-    private double signalMagnitureArea;
-    private double signalVectorMagnitude;
-    private double averageAbsoluteRelativeDifference;
-    private double averageResultantAcceleration;
+
+    public Window(Window window){
+        this.listOfFeatureLines = new ArrayList<>();
+        for (FeatureLine fl : window.getListOfFeatureLines()) {
+            listOfFeatureLines.add(new FeatureLine(fl));
+        }
+        this.label = window.getLabel();
+    }
 
     public static Window createFromEventRecordList(List<SensorEventRecord> listOfEvents, String label){
         Window w = new Window();
@@ -155,6 +147,7 @@ public class Window implements Serializable {
                 Double.valueOf(listOfStuff[6]), Double.valueOf(listOfStuff[8]), Double.valueOf(listOfStuff[10]),
                 (int) Long.parseLong(listOfStuff[12]));
     }
+
 
     public void addFeatureLine(FeatureLine fl){
         this.listOfFeatureLines.add(fl);
