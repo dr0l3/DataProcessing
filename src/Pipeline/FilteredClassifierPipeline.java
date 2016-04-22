@@ -33,7 +33,10 @@ public class FilteredClassifierPipeline {
         //Declare the threadpool
         ExecutorService executorService = Executors.newFixedThreadPool(8);
 
-        //Import all data
+        /**
+         * PARAMETERS
+         */
+        ClassifierType type_of_classifer = ClassifierType.SIT_STAND_CLASSIFIER;
         System.out.println("Importing data");
         String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawDataProx";
         //String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawData";
@@ -47,7 +50,7 @@ public class FilteredClassifierPipeline {
         BiasConfiguration nullBias = new BiasConfiguration(0, 0 , 0, 0, 0, 0);
 
         List<String> featureFileURIs = CompleteFeatureFileGenerator.createCompleteFeatureFileWithProximitySeparateFile(
-                fromLocation,toLocation, window_size_seconds, ClassifierType.SIT_STAND_CLASSIFIER, biasForIT119);
+                fromLocation,toLocation, window_size_seconds, type_of_classifer, biasForIT119);
         //load in all the different data sets and set weights appropriately
         List<Instances> all_data_inp = new ArrayList<>();
         for (String file : featureFileURIs) {
@@ -90,7 +93,7 @@ public class FilteredClassifierPipeline {
 
         //Train individual classifiers
         System.out.println("Training individual classifiers");
-        ArrayList<ClassifierEvalDescriptionTriplet> individualClassifiers = trainIndividualClassifiers(executorService, alldata, listOfFilters);
+        ArrayList<ClassifierEvalDescriptionTriplet> individualClassifiers = trainIndividualClassifiers(executorService, alldata, listOfFilters,type_of_classifer);
 
         executorService.shutdown();
 
@@ -103,7 +106,7 @@ public class FilteredClassifierPipeline {
         new File(folderPath).mkdir();
 
         //export individual classifiers in case something goes wrong with the ensembles
-        exportClassifiers(individualClassifiers.subList(0,20), folderPath);
+        exportClassifiers(individualClassifiers.subList(0,20), folderPath, type_of_classifer);
 
         //get the 3 best classifiers
         Classifier[] the3BestClassifiers = new Classifier[3];
@@ -150,13 +153,13 @@ public class FilteredClassifierPipeline {
         return metaClassifiers;
     }
 
-    private static ArrayList<ClassifierEvalDescriptionTriplet> trainIndividualClassifiers(ExecutorService executorService, Instances alldata, List<Filter> listOfFilters) {
+    private static ArrayList<ClassifierEvalDescriptionTriplet> trainIndividualClassifiers(ExecutorService executorService, Instances alldata, List<Filter> listOfFilters, ClassifierType type_of_classifer) {
         ArrayList<ClassifierEvalDescriptionTriplet> individualClassifiers = new ArrayList<>();
         ArrayList<Callable<ArrayList<ClassifierEvalDescriptionTriplet>>> individualJobs = new ArrayList<>();
         for (Filter filter : listOfFilters) {
             individualJobs.add(new LogisticGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
             //individualJobs.add(new LibSVMGridSearch(alldata,new SelectedTag(LibSVM.KERNELTYPE_POLYNOMIAL, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
-            individualJobs.add(new LibSVMGridSearch(alldata,new SelectedTag(LibSVM.KERNELTYPE_RBF, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
+            individualJobs.add(new LibSVMGridSearch(alldata,type_of_classifer,new SelectedTag(LibSVM.KERNELTYPE_RBF, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
             //individualJobs.add(new LibSVMGridSearch(alldata,new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
             individualJobs.add(new NaiveBayesGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
             individualJobs.add(new RandomForestGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
@@ -273,7 +276,7 @@ public class FilteredClassifierPipeline {
         return triplets;
     }
 
-    private static void exportClassifiers(List<ClassifierEvalDescriptionTriplet> pairs, String folderpath) throws Exception {
+    private static void exportClassifiers(List<ClassifierEvalDescriptionTriplet> pairs, String folderpath, ClassifierType type) throws Exception {
 
         ArrayList<String> stringOutput = new ArrayList<>();
 
@@ -285,9 +288,9 @@ public class FilteredClassifierPipeline {
             Evaluation eval = triplet.getEvaluation();
             String desc = triplet.getDescription();
 
-            String filename = System.currentTimeMillis()+ "_"+ classifier.getClass().getSimpleName();
+            String filename = System.currentTimeMillis()+ "_"+ classifier.getClass().getSimpleName()+type.toString();
 
-            ObjectOutputStream oss = new ObjectOutputStream(new FileOutputStream(folderpath+filename+".model"));
+            ObjectOutputStream oss = new ObjectOutputStream(new FileOutputStream(folderpath+filename.toLowerCase()+".model"));
             oss.writeObject(classifier);
             oss.flush();
             oss.close();

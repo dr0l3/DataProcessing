@@ -1,6 +1,7 @@
 package Pipeline;
 
 import Core.ClassifierEvalDescriptionTriplet;
+import Core.ClassifierType;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LibSVM;
 import weka.classifiers.meta.FilteredClassifier;
@@ -25,13 +26,15 @@ public class LibSVMGridSearch implements Callable<ArrayList<ClassifierEvalDescri
     private String regex;
     private Filter filter;
     private int numberOfCrossValidationFolds;
+    private ClassifierType classifierType;
 
-    public LibSVMGridSearch(Instances dataset, SelectedTag type, int sizeOfReturnSet, Filter filter, int numberOfCrossValidationFolds) {
+    public LibSVMGridSearch(Instances dataset, ClassifierType type_of_classifer, SelectedTag type, int sizeOfReturnSet, Filter filter, int numberOfCrossValidationFolds) {
         this.dataset = dataset;
         this.type = type;
         this.sizeOfReturnSet = sizeOfReturnSet;
         this.filter = filter;
         this.numberOfCrossValidationFolds = numberOfCrossValidationFolds;
+        this.classifierType = type_of_classifer;
     }
 
     public LibSVMGridSearch(Instances dataset, SelectedTag type, int sizeOfReturnSet, String regex, int numberOfCrossValidationFolds) {
@@ -68,6 +71,9 @@ public class LibSVMGridSearch implements Callable<ArrayList<ClassifierEvalDescri
 
                 LibSVM svm = new LibSVM();
                 svm.setOptions(options);
+                if(classifierType == ClassifierType.EVENT_SNIFFER) {
+                    svm.setProbabilityEstimates(true);
+                }
                 svm.setKernelType(type);
                 FilteredClassifier filtersvm = new FilteredClassifier();
                 //filter.setInputFormat(dataset);
