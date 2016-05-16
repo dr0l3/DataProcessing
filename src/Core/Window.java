@@ -25,6 +25,7 @@ public class Window implements Serializable {
 
     public Window(Window window){
         this.listOfFeatureLines = new ArrayList<>();
+        this.listOfFeatures = new ArrayList<>();
         for (FeatureLine fl : window.getListOfFeatureLines()) {
             listOfFeatureLines.add(new FeatureLine(fl));
         }
@@ -176,6 +177,24 @@ public class Window implements Serializable {
                 Double.valueOf(listOfStuff[12]), Double.valueOf(listOfStuff[14]), Double.valueOf(listOfStuff[16]),
                 Double.valueOf(listOfStuff[6]), Double.valueOf(listOfStuff[8]), Double.valueOf(listOfStuff[10]),
                 (int) Long.parseLong(listOfStuff[18]));
+    }
+
+    public void calculateAllFeatures(){
+        calculateECDFRepresentationDisc(30);
+        calculateECDFRepresentationRaw(30);
+        calculateECDFRepresentationUpDown(30);
+        calculateFeaturesForRawMovement();
+        calculateFeaturesForGravityDiscountedMovement();
+        calculateFeaturesForRelativeMovement();
+        calculateStartingOrientation();
+        calculateEndingOrientation();
+        calculateOrientationJitter();
+        calculateVerticalTimedDistribution(30);
+        calculateSumOfUpwardsAcceleration();
+        calculateSumOfDownwardsAcceleration();
+        calculateZeroCrossings();
+        calculateNumberOfTaps();
+        calculateProximity();
     }
 
     public void calculateProximity(){

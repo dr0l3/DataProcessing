@@ -194,7 +194,7 @@ public class FilteredClassifierPipeline {
      * @param listOfIncludeAttributes The list of attribute names to be included (attribute name needs only contain the string)
      * @return A Filter filtering out all attributes that does not contain a string in listOfIncludeAttributes
      */
-    private static Filter createFilterInclusive(Instances alldata, String[] listOfIncludeAttributes) {
+    public static Filter createFilterInclusive(Instances alldata, String[] listOfIncludeAttributes) {
         String indexListAsString = getIndexListStringInvertedSelected(alldata, Arrays.asList(listOfIncludeAttributes));
         return getRemoveFilterFromString(indexListAsString);
     }
@@ -206,7 +206,7 @@ public class FilteredClassifierPipeline {
      * @param listOfExcludeAttributes The list of attribute names to be excuded (attribute name needs only contain the string)
      * @return A Filter filtering out all attributes that does contain a string in listOfIncludeAttributes
      */
-    private static Filter createFilterExclusive(Instances alldata, String[] listOfExcludeAttributes){
+    public static Filter createFilterExclusive(Instances alldata, String[] listOfExcludeAttributes){
         String indexListAsString = getIndexListString(alldata, Arrays.asList(listOfExcludeAttributes));
         return getRemoveFilterFromString(indexListAsString);
     }
@@ -276,7 +276,7 @@ public class FilteredClassifierPipeline {
         return triplets;
     }
 
-    private static void exportClassifiers(List<ClassifierEvalDescriptionTriplet> pairs, String folderpath, ClassifierType type) throws Exception {
+    public static void exportClassifiers(List<ClassifierEvalDescriptionTriplet> pairs, String folderpath, ClassifierType type) throws Exception {
 
         ArrayList<String> stringOutput = new ArrayList<>();
 

@@ -67,6 +67,41 @@ public class CompleteFeatureFileGenerator {
         return filename;
     }
 
+    public static String createCompleteFeatureaFileWithProximityFromWindowFiles(String fromLocation, String complete_filename, ClassifierType type) {
+        //import the windows
+        List<Window> windows = WindowImporter.getWindows(fromLocation);
+        //filter the windows
+        if (type == ClassifierType.EVENT_SNIFFER) {
+            //turn all sit/stand events into events
+            windows.stream()
+                    .filter(window1 -> !window1.getLabel().contains("null"))
+                    .forEach(window2 -> window2.setLabel("event"));
+        }
+        if (type == ClassifierType.SIT_STAND_CLASSIFIER) {
+            //remove all null windows
+            windows.removeIf(window -> window.getLabel().contains("null"));
+        }
+        if(windows.isEmpty()){
+            return null;
+        }
+        //convert to arff format
+        //retarded copying of windows needed to initialize listOfFeatures
+        List<Window> windows2 = new ArrayList<>();
+        windows.forEach(window ->windows2.add(new Window(window)));
+        windows2.forEach(Window::calculateAllFeatures);
+        ArrayList<String> fileToBePrinted = new ArrayList<>();
+        fileToBePrinted.add(Util.getHeader(windows2));
+        fileToBePrinted.addAll(windows2.stream()
+                .map(Util::convertToLine)
+                .collect(Collectors.toList()));
+        fileToBePrinted.removeIf(String::isEmpty);
+        //save the file
+        Util.saveAsFile(fileToBePrinted, complete_filename);
+
+        //return the filenames
+        return complete_filename;
+    }
+
     public static List<String> createCompleteFeatureFileWithProximitySeparateFile(String fromLocation, String toLocation, double window_size_seconds, ClassifierType type, BiasConfiguration biasForSample) {
         List<Pair<String, List<Window>>> uri_window_list = new ArrayList<>();
         uri_window_list = RawlineToWindowConverterProximityVarLength.getAllWindowFromURIInSeparateLists(fromLocation, window_size_seconds, biasForSample);
@@ -74,12 +109,16 @@ public class CompleteFeatureFileGenerator {
         if (type == ClassifierType.EVENT_SNIFFER) {
             //turn all sit/stand events into events
             uri_window_list
-                    .forEach(pair -> pair.getValue().stream().filter(window -> !window.getLabel().contains("null"))
+                    .forEach(pair -> pair.getValue()
+                            .stream()
+                            .filter(window -> !window.getLabel().contains("null"))
                             .forEach(window1 -> window1.setLabel("event")));
         }
         if (type == ClassifierType.SIT_STAND_CLASSIFIER) {
             //remove all null windows
-            uri_window_list.forEach(pair -> pair.getValue().removeIf(window -> window.getLabel().contains("null")));
+            uri_window_list
+                    .forEach(pair -> pair.getValue()
+                            .removeIf(window -> window.getLabel().contains("null")));
         }
 
         List<String> fileNames = new ArrayList<>();
@@ -87,21 +126,7 @@ public class CompleteFeatureFileGenerator {
         for (Pair<String, List<Window>> pair : uri_window_list) {
             List<Window> windows = pair.getValue();
             for (Window w : windows) {
-                w.calculateECDFRepresentationDisc(30);
-                w.calculateECDFRepresentationRaw(30);
-                w.calculateECDFRepresentationUpDown(30);
-                w.calculateFeaturesForRawMovement();
-                w.calculateFeaturesForGravityDiscountedMovement();
-                w.calculateFeaturesForRelativeMovement();
-                w.calculateStartingOrientation();
-                w.calculateEndingOrientation();
-                w.calculateOrientationJitter();
-                w.calculateVerticalTimedDistribution(30);
-                w.calculateSumOfUpwardsAcceleration();
-                w.calculateSumOfDownwardsAcceleration();
-                w.calculateZeroCrossings();
-                w.calculateNumberOfTaps();
-                w.calculateProximity();
+                w.calculateAllFeatures();
             }
             ArrayList<String> fileToBePrinted = new ArrayList<>();
             fileToBePrinted.add(Util.getHeader(windows));
@@ -138,21 +163,7 @@ public class CompleteFeatureFileGenerator {
 
 
         for (Window w : windows) {
-            w.calculateECDFRepresentationDisc(30);
-            w.calculateECDFRepresentationRaw(30);
-            w.calculateECDFRepresentationUpDown(30);
-            w.calculateFeaturesForRawMovement();
-            w.calculateFeaturesForGravityDiscountedMovement();
-            w.calculateFeaturesForRelativeMovement();
-            w.calculateStartingOrientation();
-            w.calculateEndingOrientation();
-            w.calculateOrientationJitter();
-            w.calculateVerticalTimedDistribution(30);
-            w.calculateSumOfUpwardsAcceleration();
-            w.calculateSumOfDownwardsAcceleration();
-            w.calculateZeroCrossings();
-            w.calculateNumberOfTaps();
-            w.calculateProximity();
+            w.calculateAllFeatures();
         }
         ArrayList<String> fileToBePrinted = new ArrayList<>();
         fileToBePrinted.add(Util.getHeader(windows));
