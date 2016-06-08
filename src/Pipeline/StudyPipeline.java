@@ -78,7 +78,7 @@ public class StudyPipeline {
 
         //import new data
         String filename_for_new_feature_file =
-                CompleteFeatureFileGenerator.createCompleteFeatureaFileWithProximityFromWindowFiles(
+                CompleteFeatureFileGenerator.createCompleteFeatureFileWithCorrectionsIncluded(
                         path_to_new_events,
                         path_to_new_events+"\\newfeatures.arff",
                         type_of_classifer);
@@ -104,8 +104,8 @@ public class StudyPipeline {
         ArrayList<Filter> listOfFilters = new ArrayList<>();
         //listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_RAW", "class"}));
         //listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_RAW","START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
-        listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_DISC", "class"}));
-        listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_DISC", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
+//        listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_DISC", "class"}));
+//        listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_DISC", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
         listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_REST", "class"}));
         listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_REST","START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
         //listOfFilters.add(FilteredClassifierPipeline.createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_RAW_Y", "class"}));

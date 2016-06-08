@@ -23,20 +23,12 @@ public class ChartGenerator {
     public static void main(String[] args) {
 
         ArrayList<Window> windows = RawlineToTapWindowConverterVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawTapData", 3.0);
+        ArrayList<Window> windows1 = RawlineToWindowConverterProximityVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawDataProx\\it119", 3.0, new BiasConfiguration(0f,0f,0f,0f,0f,0f));
 
         String path = "D:\\Dropbox\\Thesis\\Data\\CorrectedWindows\\correctedWindows1039065005";
-        List<Window> windows_from_file = null;
-        try {
-            windows_from_file = getWindowsFromFile(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        //printDerivatives(windows);
 
-        if (windows_from_file != null) {
-            printCharts(windows_from_file);
-        }
+        printCharts(windows1);
 
 
     }
@@ -219,16 +211,16 @@ public class ChartGenerator {
             chart.setXAxisTitle("X");
             chart.setYAxisTitle("Y");
 
-            //Series_XY series_rotX = chart.addSeries("acc_x", dummy_x, acc_x);
-            //Series_XY series_rotY = chart.addSeries("acc_y", dummy_x, acc_y);
+            Series_XY series_rotX = chart.addSeries("acc_x", dummy_x, acc_x);
+            Series_XY series_rotY = chart.addSeries("acc_y", dummy_x, acc_y);
             Series_XY series_rotZ = chart.addSeries("acc_z", dummy_x, acc_z);
-            //Series_XY series_acc_up = chart.addSeries("acc_up", dummy_x, acc_up);
-            //Series_XY series_acc_rest = chart.addSeries("acc_rest", dummy_x, acc_rest);
-            //series_rotX.setMarker(SeriesMarkers.CIRCLE);
-            //series_rotY.setMarker(SeriesMarkers.DIAMOND);
+            Series_XY series_acc_up = chart.addSeries("acc_up", dummy_x, acc_up);
+            Series_XY series_acc_rest = chart.addSeries("acc_rest", dummy_x, acc_rest);
+            series_rotX.setMarker(SeriesMarkers.CIRCLE);
+            series_rotY.setMarker(SeriesMarkers.DIAMOND);
             series_rotZ.setMarker(SeriesMarkers.SQUARE);
-            //series_acc_up.setMarker(SeriesMarkers.TRIANGLE_UP);
-            //series_acc_rest.setMarker(SeriesMarkers.TRIANGLE_DOWN);
+            series_acc_up.setMarker(SeriesMarkers.TRIANGLE_UP);
+            series_acc_rest.setMarker(SeriesMarkers.TRIANGLE_DOWN);
 
             chart.getStyler().setYAxisMax(40.0);
             chart.getStyler().setYAxisMin(-40.0);

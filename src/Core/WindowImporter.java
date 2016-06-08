@@ -2,11 +2,9 @@ package Core;
 
 import org.apache.commons.math3.util.Pair;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.OptionalDataException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,6 +18,61 @@ public class WindowImporter {
             if(file.contains("window")){
                 try {
                     windows.add(getWindowFromFile(file));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return windows;
+    }
+
+    public static List<Window> getCorrectedWindows(String fromLocation){
+        List<String> files = Util.listOfFilesInDirectory(fromLocation);
+        String corrections_file = "";
+        for (String file : files) {
+            if(file.contains("correctionsfile.csv")) {
+                corrections_file = file;
+                break;
+            }
+        }
+
+        HashMap<String, String> corrections_map = new HashMap<>();
+
+        BufferedReader bufferedReader = null;
+        String line;
+        String splitter = ",";
+        try {
+            bufferedReader = new BufferedReader(new FileReader(corrections_file));
+            while((line = bufferedReader.readLine()) != null){
+                String[] correction_line = line.split(splitter);
+                if(correction_line.length == 1){
+                    corrections_map.put(correction_line[0], "null");
+                } else {
+                    corrections_map.put(correction_line[0], correction_line[1]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<Window> windows = new ArrayList<>();
+        for (String file : files) {
+            if(file.contains("window")){
+                try {
+                    Window w = getWindowFromFile(file);
+                    File window_file = new File(file);
+                    if(window_file.length()< 10 )
+                        continue;
+                    String filename = file.substring(file.lastIndexOf("\\")+7);
+                    String correction = corrections_map.get(filename);
+                    if(correction.equals("sit")){
+                        w.setLabel("sit");
+                    } else if(correction.equals("stand")){
+                        w.setLabel("stand");
+                    } else {
+                        w.setLabel("null");
+                    }
+                    windows.add(w);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

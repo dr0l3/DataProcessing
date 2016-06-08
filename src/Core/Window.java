@@ -188,6 +188,7 @@ public class Window implements Serializable {
         calculateFeaturesForRelativeMovement();
         calculateStartingOrientation();
         calculateEndingOrientation();
+//        calculateOrientationChange();
         calculateOrientationJitter();
         calculateVerticalTimedDistribution(30);
         calculateSumOfUpwardsAcceleration();
@@ -375,6 +376,7 @@ public class Window implements Serializable {
         listOfFeatures.add(new Pair<Object, Object>("RAW_Y_SPECTRAL_ENERGY", spectral_energy));
         listOfFeatures.add(new Pair<Object, Object>("RAW_Y_ENTROPY", entropy));
     }
+
     public void calculateZeroCrossings(){
         ArrayList<Integer> zeroCrossingsList = new ArrayList<>();
         double previous = Double.MIN_VALUE;
@@ -1518,6 +1520,80 @@ public class Window implements Serializable {
         for (int j = 0; j < bins; j++) {
             listOfFeatures.add(new Pair<>("TIMED_VERTICAL_BIN_" + (j+1) + "_OF_" + bins, timedVerticalDist.value((double) j / bins * timedVerticalDist.getKnots().length)));
         }
+    }
+
+    public void calculateOrientationChange(){
+        double graX = 0;
+        double graY = 0;
+        double graZ = 0;
+        int samples = 20;
+        for (int i = 0; i < samples; i++) {
+            graX += listOfFeatureLines.get(i).getGraX();
+            graY += listOfFeatureLines.get(i).getGraY();
+            graZ += listOfFeatureLines.get(i).getGraZ();
+        }
+
+        double graX_start= Math.abs(graX/samples);
+        double graY_start= Math.abs(graY/samples);
+        double graZ_start= Math.abs(graZ/samples);
+
+        graX = 0;
+        graY = 0;
+        graZ = 0;
+        int size = listOfFeatureLines.size();
+        for (int i = 0; i < samples; i++) {
+            graX += listOfFeatureLines.get(size-i-1).getGraX();
+            graY += listOfFeatureLines.get(size-i-1).getGraY();
+            graZ += listOfFeatureLines.get(size-i-1).getGraZ();
+        }
+
+        double graX_end= Math.abs(graX/samples);
+        double graY_end= Math.abs(graY/samples);
+        double graZ_end= Math.abs(graZ/samples);
+
+        /*ArrayList<Pair<String, Double>> start_orientations = new ArrayList<>();
+        start_orientations.add(new Pair<>("x", graX_start));
+        start_orientations.add(new Pair<>("y", graY_start));
+        start_orientations.add(new Pair<>("z", graZ_start));
+
+        Collections.sort(start_orientations, new Comparator<Pair<String, Double>>() {
+                    @Override
+                    public int compare(Pair<String, Double> o1, Pair<String, Double> o2) {
+                        if(o1.getValue() > o2.getValue())
+                            return -1;
+                        if(o2.getValue() > o1.getValue())
+                            return 1;
+                        return 0;
+                    }
+                });
+
+        double[] after = new double[]{0,0,0};
+        int i = 0;
+        for (Pair<String, Double> start_orientation : start_orientations) {
+            if(start_orientation.getKey().equals("x"))
+                after[i] = graX_end;
+            if(start_orientation.getKey().equals("y"))
+                after[i] = graY_end;
+            if(start_orientation.getKey().equals("z"))
+                after[i] = graZ_end;
+
+            i++;
+        }
+
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_1ST", start_orientations.get(0).getValue()));
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_2ND", start_orientations.get(1).getValue()));
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_3RD", start_orientations.get(2).getValue()));
+
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_1ST", after[0]));
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_2ND", after[1]));
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_3RD", after[2]));*/
+
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_X", graX_start));
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_Y", graY_start));
+        listOfFeatures.add(new Pair<Object, Object>("START_ORIENTATION_GRAVITY_Z", graZ_start));
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_X", graX_end));
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_Y", graY_end));
+        listOfFeatures.add(new Pair<Object, Object>("END_ORIENTATION_GRAVITY_Z", graZ_end));
     }
 
     public void calculateStartingOrientation(){

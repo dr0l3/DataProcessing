@@ -5,6 +5,10 @@ import org.apache.commons.math3.util.Pair;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,9 +71,45 @@ public class CompleteFeatureFileGenerator {
         return filename;
     }
 
+    public static String createCompleteFeatureFileWithCorrectionsIncluded(String fromLocation, String complete_filename, ClassifierType type){
+        List<Window> windows = WindowImporter.getCorrectedWindows(fromLocation);
+
+        //filter the windows
+        if (type == ClassifierType.EVENT_SNIFFER) {
+            //turn all sit/stand events into events
+            windows.stream()
+                    .filter(window1 -> !window1.getLabel().contains("null"))
+                    .forEach(window2 -> window2.setLabel("event"));
+        }
+        if (type == ClassifierType.SIT_STAND_CLASSIFIER) {
+            //remove all null windows
+            windows.removeIf(window -> window.getLabel().contains("null"));
+        }
+        if(windows.isEmpty()){
+            return null;
+        }
+        //convert to arff format
+        //retarded copying of windows needed to initialize listOfFeatures
+        List<Window> windows2 = new ArrayList<>();
+        windows.forEach(window ->windows2.add(new Window(window)));
+        windows2.forEach(Window::calculateAllFeatures);
+        ArrayList<String> fileToBePrinted = new ArrayList<>();
+        fileToBePrinted.add(Util.getHeader(windows2));
+        fileToBePrinted.addAll(windows2.stream()
+                .map(Util::convertToLine)
+                .collect(Collectors.toList()));
+        fileToBePrinted.removeIf(String::isEmpty);
+        //save the file
+        Util.saveAsFile(fileToBePrinted, complete_filename);
+
+        //return the filenames
+        return complete_filename;
+    }
+
     public static String createCompleteFeatureaFileWithProximityFromWindowFiles(String fromLocation, String complete_filename, ClassifierType type) {
         //import the windows
         List<Window> windows = WindowImporter.getWindows(fromLocation);
+
         //filter the windows
         if (type == ClassifierType.EVENT_SNIFFER) {
             //turn all sit/stand events into events

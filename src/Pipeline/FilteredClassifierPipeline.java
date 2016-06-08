@@ -36,7 +36,7 @@ public class FilteredClassifierPipeline {
         /**
          * PARAMETERS
          */
-        ClassifierType type_of_classifer = ClassifierType.SIT_STAND_CLASSIFIER;
+        ClassifierType type_of_classifer = ClassifierType.EVENT_SNIFFER;
         System.out.println("Importing data");
         String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawDataProx";
         //String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawData";
@@ -75,20 +75,20 @@ public class FilteredClassifierPipeline {
 
         //Create filters for desired subsets
         ArrayList<Filter> listOfFilters = new ArrayList<>();
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_RAW", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_RAW","START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_DISC", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_DISC", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_RAW", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_RAW","START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_DISC", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_DISC", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
         listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_REST", "class"}));
         listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_REST","START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_RAW_Y", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_RAW_Y", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_RAW_Y", "class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ECDF_UP", "ECDF_RAW_Y", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
 //        listOfFilters.add(createFilterInclusive(alldata, new String[]{"TIMED_VERTICAL_BIN","UpAcc_Mean", "class"}));
-        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ORIENTATION", "PROXIMITY","class"}));
+//        listOfFilters.add(createFilterInclusive(alldata, new String[]{"ORIENTATION", "PROXIMITY","class"}));
         listOfFilters.add(createFilterInclusive(alldata, new String[]{"ZERO_CROSSINGS_VERTICAL", "PURITY", "VERTICAL_POSITIVE_ACCELERATION", "VERTICAL_NEGATIVE_ACCELERATION","PROXIMITY", "class"}));
         listOfFilters.add(createFilterInclusive(alldata, new String[]{"ZERO_CROSSINGS_VERTICAL", "PURITY", "VERTICAL_POSITIVE_ACCELERATION", "VERTICAL_NEGATIVE_ACCELERATION", "START_ORIENTATION","END_ORIENTATION","PROXIMITY", "class"}));
 //        listOfFilters.add(createFilterInclusive(alldata, new String[]{"NUMBER_OF_RAW_Z_TAPS", "class"}));
-        listOfFilters.add(createFilterExclusive(alldata, new String[]{"ECDF","ORIENTATION","TIMED_VERTICAL", "ZERO_CROSSING", "PURITY", "VERTICAL_POSITIVE_ACCELERATION", "VERTICAL_NEGATIVE_ACCELERATION"}));
+//        listOfFilters.add(createFilterExclusive(alldata, new String[]{"ECDF","ORIENTATION","TIMED_VERTICAL", "ZERO_CROSSING", "PURITY", "VERTICAL_POSITIVE_ACCELERATION", "VERTICAL_NEGATIVE_ACCELERATION"}));
 
 
         //Train individual classifiers
@@ -157,14 +157,14 @@ public class FilteredClassifierPipeline {
         ArrayList<ClassifierEvalDescriptionTriplet> individualClassifiers = new ArrayList<>();
         ArrayList<Callable<ArrayList<ClassifierEvalDescriptionTriplet>>> individualJobs = new ArrayList<>();
         for (Filter filter : listOfFilters) {
-            individualJobs.add(new LogisticGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
+//            individualJobs.add(new LogisticGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
             //individualJobs.add(new LibSVMGridSearch(alldata,new SelectedTag(LibSVM.KERNELTYPE_POLYNOMIAL, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
             individualJobs.add(new LibSVMGridSearch(alldata,type_of_classifer,new SelectedTag(LibSVM.KERNELTYPE_RBF, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
             //individualJobs.add(new LibSVMGridSearch(alldata,new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE),PQ_CAPACITY_FOR_SVM,filter,CROSS_VALIDATION_NUMBER_OF_FOLDS));
-            individualJobs.add(new NaiveBayesGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
-            individualJobs.add(new RandomForestGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
-            individualJobs.add(new NearestNeighborGridSearch(alldata,new ManhattanDistance(),filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
-            individualJobs.add(new NearestNeighborGridSearch(alldata,new EuclideanDistance(),filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
+//            individualJobs.add(new NaiveBayesGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
+//            individualJobs.add(new RandomForestGridSearch(alldata,filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
+//            individualJobs.add(new NearestNeighborGridSearch(alldata,new ManhattanDistance(),filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
+//            individualJobs.add(new NearestNeighborGridSearch(alldata,new EuclideanDistance(),filter, CROSS_VALIDATION_NUMBER_OF_FOLDS));
         }
 
 
