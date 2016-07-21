@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
  */
 public class CompleteFeatureFileGenerator {
 
+    private static boolean DO_FILTERING = false;
+
     public static void main(String[] args) {
         BiasConfiguration nullBias = new BiasConfiguration(0, 0, 0, 0, 0, 0);
         createCompleteFeatureFileWithProximity("D:\\Dropbox\\Thesis\\Data\\RawDataProx", "D:\\Dropbox\\Thesis\\Data\\Test\\", 3., ClassifierType.EVENT_SNIFFER, nullBias);
@@ -69,6 +71,90 @@ public class CompleteFeatureFileGenerator {
         String filename = toLocation + filenameSuffix;
         Util.saveAsFile(fileToBePrinted, filename);
         return filename;
+    }
+
+    public static String createCompleteFeatureFileWithCorrectionsIncludedMultipleUsersNoBias(String fromLocation, String complete_filename, ClassifierType type){
+        List<Window> windows = WindowImporter.getCorrectedWindowsMutlipleUsersUnaplyBias(fromLocation);
+
+
+        //filter the windows
+        if (type == ClassifierType.EVENT_SNIFFER) {
+            //turn all sit/stand events into events
+            windows.stream()
+                    .filter(window1 -> !window1.getLabel().contains("null"))
+                    .forEach(window2 -> window2.setLabel("event"));
+        }
+        if (type == ClassifierType.SIT_STAND_CLASSIFIER) {
+            //remove all null windows
+            windows.removeIf(window -> window.getLabel().contains("null"));
+        }
+        if(windows.isEmpty()){
+            return null;
+        }
+        //convert to arff format
+        //retarded copying of windows needed to initialize listOfFeatures
+        List<Window> windows2 = new ArrayList<>();
+        windows.forEach(window ->windows2.add(new Window(window)));
+        windows2.forEach(Window::calculateAllFeatures);
+        if(DO_FILTERING) {
+            windows2.removeIf(window -> !window.getLabel().equals("null") && totalAccelerationLowerThan110(window));
+        }
+        ArrayList<String> fileToBePrinted = new ArrayList<>();
+        fileToBePrinted.add(Util.getHeader(windows2));
+        fileToBePrinted.addAll(windows2.stream()
+                .map(Util::convertToLine)
+                .collect(Collectors.toList()));
+        fileToBePrinted.removeIf(String::isEmpty);
+        //save the file
+        Util.saveAsFile(fileToBePrinted, complete_filename);
+
+        //return the filenames
+        return complete_filename;
+    }
+
+    public static String createCompleteFeatureFileWithCorrectionsIncludedMultipleUsers(String fromLocation, String complete_filename, ClassifierType type){
+        List<Window> windows = WindowImporter.getCorrectedWindowsMultipleUsers(fromLocation);
+
+
+        //filter the windows
+        if (type == ClassifierType.EVENT_SNIFFER) {
+            //turn all sit/stand events into events
+            windows.stream()
+                    .filter(window1 -> !window1.getLabel().contains("null"))
+                    .forEach(window2 -> window2.setLabel("event"));
+        }
+        if (type == ClassifierType.SIT_STAND_CLASSIFIER) {
+            //remove all null windows
+            windows.removeIf(window -> window.getLabel().contains("null"));
+        }
+        if(windows.isEmpty()){
+            return null;
+        }
+        //convert to arff format
+        //retarded copying of windows needed to initialize listOfFeatures
+        List<Window> windows2 = new ArrayList<>();
+        windows.forEach(window ->windows2.add(new Window(window)));
+        windows2.forEach(Window::calculateAllFeatures);
+        if(DO_FILTERING) {
+            windows2.removeIf(window -> !window.getLabel().equals("null") && totalAccelerationLowerThan110(window));
+        }
+        ArrayList<String> fileToBePrinted = new ArrayList<>();
+        fileToBePrinted.add(Util.getHeader(windows2));
+        fileToBePrinted.addAll(windows2.stream()
+                .map(Util::convertToLine)
+                .collect(Collectors.toList()));
+        fileToBePrinted.removeIf(String::isEmpty);
+        //save the file
+        Util.saveAsFile(fileToBePrinted, complete_filename);
+
+        //return the filenames
+        return complete_filename;
+    }
+
+    private static boolean totalAccelerationLowerThan110(Window window) {
+        Double total_up = (Double) window.getListOfFeatures().get(334).getValue();
+        Double total_down = (Double) window.getListOfFeatures().get(335).getValue();
+        return Math.abs(total_down) + Math.abs(total_up) < 110;
     }
 
     public static String createCompleteFeatureFileWithCorrectionsIncluded(String fromLocation, String complete_filename, ClassifierType type){
@@ -167,6 +253,9 @@ public class CompleteFeatureFileGenerator {
             List<Window> windows = pair.getValue();
             for (Window w : windows) {
                 w.calculateAllFeatures();
+            }
+            if(DO_FILTERING) {
+                windows.removeIf(window -> !window.getLabel().equals("null") && totalAccelerationLowerThan110(window));
             }
             ArrayList<String> fileToBePrinted = new ArrayList<>();
             fileToBePrinted.add(Util.getHeader(windows));

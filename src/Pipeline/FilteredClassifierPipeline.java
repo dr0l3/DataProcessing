@@ -36,7 +36,7 @@ public class FilteredClassifierPipeline {
         /**
          * PARAMETERS
          */
-        ClassifierType type_of_classifer = ClassifierType.EVENT_SNIFFER;
+        ClassifierType type_of_classifer = ClassifierType.SIT_STAND_CLASSIFIER;
         System.out.println("Importing data");
         String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawDataProx";
         //String fromLocation = "D:\\Dropbox\\Thesis\\Data\\RawData";
@@ -48,6 +48,9 @@ public class FilteredClassifierPipeline {
                 -0.011f, 0.024f, 0.083f);
         BiasConfiguration megaBias = new BiasConfiguration(100, 100, 100, 100, 100, 100);
         BiasConfiguration nullBias = new BiasConfiguration(0, 0 , 0, 0, 0, 0);
+
+        String featureFileURI = CompleteFeatureFileGenerator.createCompleteFeatureFileWithProximity(
+                fromLocation,toLocation, window_size_seconds, type_of_classifer, biasForIT119);
 
         List<String> featureFileURIs = CompleteFeatureFileGenerator.createCompleteFeatureFileWithProximitySeparateFile(
                 fromLocation,toLocation, window_size_seconds, type_of_classifer, biasForIT119);

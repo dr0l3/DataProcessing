@@ -1,5 +1,6 @@
 package Chart;
 
+import ArffFile.CompleteFeatureFileGenerator;
 import Core.*;
 import Core.Window;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -22,13 +23,14 @@ import java.util.List;
 public class ChartGenerator {
     public static void main(String[] args) {
 
-        ArrayList<Window> windows = RawlineToTapWindowConverterVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawTapData", 3.0);
-        ArrayList<Window> windows1 = RawlineToWindowConverterProximityVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawDataProx\\it119", 3.0, new BiasConfiguration(0f,0f,0f,0f,0f,0f));
+//        ArrayList<Window> windows = RawlineToTapWindowConverterVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawTapData", 3.0);
+//        ArrayList<Window> windows1 = RawlineToWindowConverterProximityVarLength.getAllWindowsFromURI("D:\\Dropbox\\Thesis\\Data\\RawDataProx\\it119", 3.0, new BiasConfiguration(0f,0f,0f,0f,0f,0f));
+        List<Window> windows2 = WindowImporter.getCorrectedWindowsMultipleUsers("D:\\ThesisDataFiltered");
 
         String path = "D:\\Dropbox\\Thesis\\Data\\CorrectedWindows\\correctedWindows1039065005";
 
 
-        printCharts(windows1);
+        printCharts(windows2);
 
 
     }
@@ -128,7 +130,7 @@ public class ChartGenerator {
 
     public static void printChartWithTitle(List<Pair<Window,String>> windows){
         long time = System.currentTimeMillis();
-        String folderpath = "D:\\Dropbox\\Thesis\\Charts\\Charts"+time;
+        String folderpath = "D:\\ThesisCharts\\Charts"+time;
         File dir = new File(folderpath);
         dir.mkdir();
 
